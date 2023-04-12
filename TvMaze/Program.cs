@@ -13,6 +13,24 @@ bool IsDevelopment() => !_nonLocalEnv.Contains(System.Environment.GetEnvironment
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddDbContext<TvMazeContext>(o =>
+{
+    o.UseSqlServer(ConnectionSettings.DefaultConnection, b => b.MigrationsAssembly("TvMaze.Data"));
+
+    if (!_nonLocalEnv.Contains(Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")))
+    {
+        o.EnableSensitiveDataLogging(true);
+        o.AddInterceptors(new TraceCommandInterceptor());
+    }
+    else
+    {
+        o.ConfigureWarnings(w => w.Ignore(
+            CoreEventId.FirstWithoutOrderByAndFilterWarning,
+            RelationalEventId.MultipleCollectionIncludeWarning,
+            CoreEventId.RowLimitingOperationWithoutOrderByWarning));
+    }
+});
+
 var configurationBuilder = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json", true)
     .AddJsonFile($"appsettings.{System.Environment.MachineName}.json", true)
@@ -30,7 +48,7 @@ Log.Logger = logger.CreateLogger();
 var app = builder.Build();
 
 IHost host = Host.CreateDefaultBuilder(args)
-//    .ConfigureWebHostDefaults(webBuilder => webBuilder.UseKestrel(options => options.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(5)))
+    .ConfigureWebHostDefaults(webBuilder => webBuilder.UseKestrel(options => options.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(5)))
     .ConfigureLogging((context, builder) => builder.AddConsole())
     .ConfigureServices(services =>
     {
@@ -52,25 +70,7 @@ IHost host = Host.CreateDefaultBuilder(args)
         services.AddTransient<IScraperScopeService, ScraperScopeService>();
         //services.AddHostedService<ShowCastScaperWorker>();
         services.AddHostedService<SchedulesIndexingService>();
-
-
-        services.AddDbContext<TvMazeContext>(o =>
-        {
-            o.UseSqlServer(ConnectionSettings.DefaultConnection, b => b.MigrationsAssembly("TvMaze.Data"));
-
-            if (!_nonLocalEnv.Contains(Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")))
-            {
-                o.EnableSensitiveDataLogging(true);
-                o.AddInterceptors(new TraceCommandInterceptor());
-            }
-            else
-            {
-                o.ConfigureWarnings(w => w.Ignore(
-                    CoreEventId.FirstWithoutOrderByAndFilterWarning,
-                    RelationalEventId.MultipleCollectionIncludeWarning,
-                    CoreEventId.RowLimitingOperationWithoutOrderByWarning));
-            }
-        });
+        
     })
     .Build();
 
