@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33424.131
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TvMaze", "TvMaze\TvMaze.csproj", "{1D82FBA9-0275-4B70-8565-4DD456A7102B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TvMaze.Domain", "TvMaze.Domain\TvMaze.Domain.csproj", "{60DB7459-5199-4F3E-9061-835A874B7FE2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TvMaze.Data", "TvMaze.Data\TvMaze.Data.csproj", "{70CC1B0C-D061-4153-844E-39171BEDE504}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1D82FBA9-0275-4B70-8565-4DD456A7102B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1D82FBA9-0275-4B70-8565-4DD456A7102B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1D82FBA9-0275-4B70-8565-4DD456A7102B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1D82FBA9-0275-4B70-8565-4DD456A7102B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{60DB7459-5199-4F3E-9061-835A874B7FE2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{60DB7459-5199-4F3E-9061-835A874B7FE2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{60DB7459-5199-4F3E-9061-835A874B7FE2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{60DB7459-5199-4F3E-9061-835A874B7FE2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{70CC1B0C-D061-4153-844E-39171BEDE504}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{70CC1B0C-D061-4153-844E-39171BEDE504}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{70CC1B0C-D061-4153-844E-39171BEDE504}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{70CC1B0C-D061-4153-844E-39171BEDE504}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A5FC127B-B463-4EC3-886D-A803E5EEE888}
+	EndGlobalSection
+EndGlobal
