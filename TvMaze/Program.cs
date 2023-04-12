@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Serilog;
+using TvMaze.Core.Services.Shows;
 using TvMaze.Data.Context;
 using TvMaze.Data.Interceptors;
 using TvMaze.Services;
@@ -11,7 +12,28 @@ using TvMaze.Workers.Models.Settings;
 var _nonLocalEnv = new List<string> { "Test", "Acc", "Prod", "Scrum" };
 bool IsDevelopment() => !_nonLocalEnv.Contains(System.Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? string.Empty);
 
+var configurationBuilder = new ConfigurationBuilder()
+    .AddJsonFile("appsettings.json", true)
+    .AddJsonFile($"appsettings.{System.Environment.MachineName}.json", true)
+    .AddEnvironmentVariables();
+
+var configuration = configurationBuilder.Build();
+configuration.GetSection("ConnectionSettings").Bind(new ConnectionSettings());
+configuration.GetSection("TvMaze.Api.Settings").Bind(new TvMazeApiSettings());
+
+var logger = LogService.AddLogger(configuration);
+Log.Logger = logger.CreateLogger();
+
+
 var builder = WebApplication.CreateBuilder(args);
+
+
+var tvMazeApiSettings = configuration.GetSection("TvMaze.Api.Settings").Get<TvMazeApiSettings>();
+builder.Services.AddSingleton(tvMazeApiSettings);
+
+builder.Services.AddTransient<IShowService, ShowService>();
+builder.Services.AddTransient<IScraperScopeService, ScraperScopeService>();
+builder.Services.AddTransient<IApiFactory, ApiFactory>();
 
 builder.Services.AddDbContext<TvMazeContext>(o =>
 {
@@ -31,46 +53,23 @@ builder.Services.AddDbContext<TvMazeContext>(o =>
     }
 });
 
-var configurationBuilder = new ConfigurationBuilder()
-    .AddJsonFile("appsettings.json", true)
-    .AddJsonFile($"appsettings.{System.Environment.MachineName}.json", true)
-    .AddEnvironmentVariables();
+builder.Services.AddHostedService<SchedulesIndexingService>();
 
-var configuration = configurationBuilder.Build();
-configuration.GetSection("ConnectionSettings").Bind(new ConnectionSettings());
-configuration.GetSection("TvMaze.Api.Settings").Bind(new TvMazeApiSettings());
 
-var logger = LogService.AddLogger(configuration);
-Log.Logger = logger.CreateLogger();
 
 // Add services to the container.
 
 var app = builder.Build();
+
+await app.RunAsync();
 
 IHost host = Host.CreateDefaultBuilder(args)
     .ConfigureWebHostDefaults(webBuilder => webBuilder.UseKestrel(options => options.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(5)))
     .ConfigureLogging((context, builder) => builder.AddConsole())
     .ConfigureServices(services =>
     {
-        var tvMazeApiSettings = configuration.GetSection("TvMaze.Api.Settings").Get<TvMazeApiSettings>();
-
-        services.AddSingleton(tvMazeApiSettings);
-        services.AddTransient<IApiFactory, ApiFactory>();
-
-        //services.AddHttpClient("tvmaze-api", o =>
-        // {
-        //     o.Timeout = new TimeSpan(0, 0, configuration.GetValue<int>("AppSettings:HttpClientTimeoutSeconds"));
-        //     o.BaseAddress = new Uri(tvMazeApiSettings.BaseUrl);
-        //     o.DefaultRequestVersion = new Version(2, 0);
-        //     o.DefaultRequestHeaders.ConnectionClose = true;
-        // });
 
 
-
-        services.AddTransient<IScraperScopeService, ScraperScopeService>();
-        //services.AddHostedService<ShowCastScaperWorker>();
-        services.AddHostedService<SchedulesIndexingService>();
-        
     })
     .Build();
 

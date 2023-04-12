@@ -27,6 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\TvMaze.Core\TvMaze.Core.csproj" />
     <ProjectReference Include="..\TvMaze.Data\TvMaze.Data.csproj" />
   </ItemGroup>
 
