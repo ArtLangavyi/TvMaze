@@ -2,11 +2,11 @@
 
 namespace TvMaze.Workers
 {
-    public class ShowCastScaperWorker : BackgroundService
+    public class ShowCastScaperService : BackgroundService
     {
         private readonly IServiceScopeFactory _serviceScopeFactory;
-        private readonly ILogger<ShowCastScaperWorker> _logger;
-        public ShowCastScaperWorker(ILogger<ShowCastScaperWorker> logger, IServiceScopeFactory serviceScopeFactory)
+        private readonly ILogger<ShowCastScaperService> _logger;
+        public ShowCastScaperService(ILogger<ShowCastScaperService> logger, IServiceScopeFactory serviceScopeFactory)
         {
             _logger = logger;
             _serviceScopeFactory = serviceScopeFactory;

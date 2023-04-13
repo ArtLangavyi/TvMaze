@@ -1,5 +1,5 @@
 ﻿using TvMaze.Core.Models.Schedule;
-using TvMaze.Domain.ShowLinkEntity;
+using TvMaze.Domain;
 
 namespace TvMaze.Core.Mappers
 {

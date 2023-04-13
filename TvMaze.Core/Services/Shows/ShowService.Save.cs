@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TvMaze.Core.Models.Schedule;
-using TvMaze.Domain.ShowLinkEntity;
+using TvMaze.Domain;
 
 namespace TvMaze.Core.Services.Shows
 {

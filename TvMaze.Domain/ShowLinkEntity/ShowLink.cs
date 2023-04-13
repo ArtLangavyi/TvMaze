@@ -1,5 +1,5 @@
 ﻿
-namespace TvMaze.Domain.ShowLinkEntity
+namespace TvMaze.Domain
 {
     public class ShowLink : BaseDb
     {
