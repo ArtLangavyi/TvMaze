@@ -21,11 +21,12 @@ namespace TvMaze.Services
         }
         public Task<bool> PullDataAsync()
         {
-            var handler = new HttpClientHandler();
-            handler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true;
-            handler.SslProtocols = System.Security.Authentication.SslProtocols.Tls12 | System.Security.Authentication.SslProtocols.Tls13;
+            var handler = new SocketsHttpHandler();
+            handler.SslOptions.EnabledSslProtocols = System.Security.Authentication.SslProtocols.Tls12 | System.Security.Authentication.SslProtocols.Tls13;
+            handler.MaxConnectionsPerServer = int.MaxValue;
             handler.EnableMultipleHttp2Connections = true;
 
+            var client = new HttpClient(handler);
 
             return Task.FromResult(true);
         }
