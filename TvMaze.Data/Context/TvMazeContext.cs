@@ -67,7 +67,7 @@ namespace TvMaze.Data.Context
 
                 entity.Property(e => e.Id);
 
-                entity.HasIndex(e => new { e.Id, e.ShowId, e.CastId})
+                entity.HasIndex(e => new { e.Id, e.ShowId, e.CastId })
                     .HasDatabaseName("IX_ShowCastRelation_ShowId_Cast_id");
 
                 entity.Property(e => e.ShowId);

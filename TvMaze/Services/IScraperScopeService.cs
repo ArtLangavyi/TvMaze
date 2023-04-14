@@ -2,7 +2,7 @@
 {
     public interface IScraperScopeService
     {
-        Task<bool> PullDataAsync();
+        Task PullDataAsync();
         Task PullAllShowsFromSchedulesAsync();
     }
 }

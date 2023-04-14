@@ -1,12 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Serilog;
+using System.Net;
+using TvMaze.Clients;
 using TvMaze.Core.Services.Shows;
 using TvMaze.Data.Context;
 using TvMaze.Data.Interceptors;
 using TvMaze.Services;
 using TvMaze.Workers;
-using TvMaze.Workers.Clients;
 using TvMaze.Workers.Models.Settings;
 
 var _nonLocalEnv = new List<string> { "Test", "Acc", "Prod", "Scrum" };
@@ -31,9 +32,48 @@ var builder = WebApplication.CreateBuilder(args);
 var tvMazeApiSettings = configuration.GetSection("TvMaze.Api.Settings").Get<TvMazeApiSettings>();
 builder.Services.AddSingleton(tvMazeApiSettings);
 
+
+if (tvMazeApiSettings.ProxyEnabled)
+{
+    builder.Services.AddHttpClient("tvmaze-api", o => { o.BaseAddress = new Uri(tvMazeApiSettings.BaseUrl); })
+    .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler()
+    {
+
+        Proxy = new WebProxy(new Uri(tvMazeApiSettings.ProxyUri)),
+        UseProxy = true
+    }).ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler()
+    {
+        SslOptions = new System.Net.Security.SslClientAuthenticationOptions()
+        {
+            EnabledSslProtocols = System.Security.Authentication.SslProtocols.Tls12 | System.Security.Authentication.SslProtocols.Tls13,
+        },
+        MaxConnectionsPerServer = int.MaxValue,
+        EnableMultipleHttp2Connections = true
+    });
+}
+else
+{
+    builder.Services.AddHttpClient("tvmaze-api", o =>
+    {
+        o.Timeout = TimeSpan.FromSeconds(tvMazeApiSettings.HttpClientTimeoutSeconds);
+        o.BaseAddress = new Uri(tvMazeApiSettings.BaseUrl);
+    }).ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler()
+    {
+        SslOptions = new System.Net.Security.SslClientAuthenticationOptions()
+        {
+            EnabledSslProtocols = System.Security.Authentication.SslProtocols.Tls12 | System.Security.Authentication.SslProtocols.Tls13,
+        },
+        MaxConnectionsPerServer = int.MaxValue,
+        EnableMultipleHttp2Connections = true
+    });
+}
+
+
+builder.Services.AddTransient<ITvMazeApiFactory, TvMazeApiFactory>();
+
 builder.Services.AddTransient<IShowService, ShowService>();
 builder.Services.AddTransient<IScraperScopeService, ScraperScopeService>();
-builder.Services.AddTransient<IApiFactory, ApiFactory>();
+
 
 builder.Services.AddDbContext<TvMazeContext>(o =>
 {
@@ -54,6 +94,7 @@ builder.Services.AddDbContext<TvMazeContext>(o =>
 });
 
 builder.Services.AddHostedService<SchedulesIndexingService>();
+builder.Services.AddHostedService<ShowCastScaperService>();
 
 
 

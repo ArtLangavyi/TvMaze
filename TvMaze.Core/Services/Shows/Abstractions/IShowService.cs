@@ -5,5 +5,6 @@ namespace TvMaze.Core.Services.Shows
     public interface IShowService
     {
         Task SaveShowUrlsAsync(List<ScheduleOverview> scheduleOverviewList);
+        Task<List<string>> GetActualShowUrlsAsync();
     }
 }

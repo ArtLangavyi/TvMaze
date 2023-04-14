@@ -8,5 +8,8 @@
 
         public static string Environment { get; set; }
         public string BaseUrl { get; set; }
+        public bool ProxyEnabled { get; set; }
+        public string ProxyUri { get; set; }
+        public int HttpClientTimeoutSeconds { get; set; }
     }
 }
