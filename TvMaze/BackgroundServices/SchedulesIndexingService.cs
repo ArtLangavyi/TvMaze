@@ -2,7 +2,12 @@
 
 namespace TvMaze.Workers
 {
-    public class SchedulesIndexingService : BackgroundService
+    public interface ISchedulesIndexingService
+    {
+        Task TestConnection(CancellationToken stoppingToken);
+    }
+
+    public class SchedulesIndexingService : BackgroundService, ISchedulesIndexingService
     {
         private readonly ILogger<SchedulesIndexingService> _logger;
         private readonly IServiceProvider _services;
@@ -16,6 +21,11 @@ namespace TvMaze.Workers
             _services = services;
 
             _delayMinutes = config.GetValue<int>("AppSettings:SchedulesWorker.BatchDelayMinutesSchedulesIndex");
+        }
+
+        public Task TestConnection(CancellationToken stoppingToken)
+        {
+            return Task.CompletedTask;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
