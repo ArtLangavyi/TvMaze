@@ -101,26 +101,20 @@ builder.Services.AddSwaggerGen(c =>
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "TvMaze API", Version = "v1" });
 });
 
+builder.Services.AddResponseCaching();
+
 builder.Services.AddControllers(o => ResponseCacheHelper.RegisterCacheProfiles(o.CacheProfiles, tvMazeApiSettings));
 
 var app = builder.Build();
 
+app.MapControllers();
+
 app.UseSwagger();
+
+app.MapGet("/", () => "Hello World!");
 
 app.UseSwaggerUI();
 
+app.UseResponseCaching();
+
 await app.RunAsync();
-
-
-IHost host = Host.CreateDefaultBuilder(args)
-    .ConfigureWebHostDefaults(webBuilder => webBuilder.UseKestrel(options => options.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(5)))
-    .ConfigureLogging((context, builder) => builder.AddConsole())
-    .ConfigureServices(services =>
-    {
-
-       
-
-    })
-    .Build();
-
-await host.RunAsync();

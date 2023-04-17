@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using NSwag.Annotations;
-using TvMaze.Core.Models;
+using TvMaze.Core.Models.ApiResponse;
+using TvMaze.Core.Services.Shows;
 using TvMaze.Helpers;
-using TvMaze.Models.Api;
 
 namespace TvMaze.Controllers
 {
@@ -10,19 +10,19 @@ namespace TvMaze.Controllers
     [ResponseCache(CacheProfileName = ResponseCacheHelper.Public5minVaryByAllQueryKeys)]
     public class ShowsController : BaseApiController
     {
-        public ShowsController(IConfiguration config) : base(config)
+        private readonly IShowService _showService;
+        public ShowsController(IConfiguration config, IShowService showService) : base(config)
         {
+            _showService = showService;
         }
 
-        [HttpGet]
+        [HttpGet("overview")]
         [OpenApiTag("Shows")]
         [OpenApiOperation("Get Shows", "All shows with cast")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ErrorResponse))]
-        [ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(ErrorResponse))]
-        public async Task<ActionResult<List<int>>> GetShowsWithCastAsync()
+        public async Task<ActionResult<List<ShowCastOverviewResponse>>> GetShowsWithCastAsync()
         {
-            var result = new ServiceModelResult<List<int>>();
+            var result = await _showService.GetShowsWithCastAsync();
 
             return ModelOrError(result);
         }
