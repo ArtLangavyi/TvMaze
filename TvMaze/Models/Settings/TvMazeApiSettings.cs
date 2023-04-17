@@ -11,5 +11,6 @@
         public bool ProxyEnabled { get; set; }
         public string ProxyUri { get; set; }
         public int HttpClientTimeoutSeconds { get; set; }
+        public bool PublicCacheEnabled { get; set; }
     }
 }

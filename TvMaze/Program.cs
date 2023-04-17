@@ -1,11 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.OpenApi.Models;
 using Serilog;
 using System.Net;
 using TvMaze.Clients;
 using TvMaze.Core.Services.Shows;
 using TvMaze.Data.Context;
 using TvMaze.Data.Interceptors;
+using TvMaze.Helpers;
 using TvMaze.Services;
 using TvMaze.Workers;
 using TvMaze.Workers.Models.Settings;
@@ -94,8 +96,18 @@ builder.Services.AddDbContext<TvMazeContext>(o =>
 
 builder.Services.AddHostedService<SchedulesIndexingService>();
 builder.Services.AddHostedService<ShowCastScaperService>();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "TvMaze API", Version = "v1" });
+});
+
+builder.Services.AddControllers(o => ResponseCacheHelper.RegisterCacheProfiles(o.CacheProfiles, tvMazeApiSettings));
 
 var app = builder.Build();
+
+app.UseSwagger();
+
+app.UseSwaggerUI();
 
 await app.RunAsync();
 
@@ -106,6 +118,7 @@ IHost host = Host.CreateDefaultBuilder(args)
     .ConfigureServices(services =>
     {
 
+       
 
     })
     .Build();
