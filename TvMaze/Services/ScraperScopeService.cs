@@ -32,7 +32,7 @@ namespace TvMaze.Services
 
                 using (var client = _tvMazeApiFactory.MakeHttpClient())
                 {
-                    await Parallel.ForEachAsync(showLinks.Take(10), parallelOptions, async (show, cancellationToken) =>
+                    await Parallel.ForEachAsync(showLinks, parallelOptions, async (show, cancellationToken) =>
                     {
                         try
                         {

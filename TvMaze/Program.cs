@@ -94,7 +94,7 @@ builder.Services.AddDbContext<TvMazeContext>(o =>
     }
 });
 
-//builder.Services.AddHostedService<SchedulesIndexingService>();
+builder.Services.AddHostedService<SchedulesIndexingService>();
 builder.Services.AddHostedService<ShowCastScaperService>();
 
 var app = builder.Build();

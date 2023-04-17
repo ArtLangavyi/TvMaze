@@ -135,15 +135,11 @@ namespace TvMaze.Core.Services.Shows
             {
                 var allShowCastPersones = showDetailResponseList.SelectMany(s => s._embedded.Cast.Select(c => new { ShowId = s.Id, CastPersoneId = c.Person.Id })).Distinct().ToList();
 
-                //var obsoleteEntities = await _context.ShowCastRelation.Where(s => !showDetailResponseList.Any(r=>r.Id == s.ShowId && !r._embedded.Cast.Any(c=>c.Person.Id == s.CastPersoneId))).ToListAsync();
                 var showIDs = allShowCastPersones.Select(c=> c.ShowId).Distinct().ToList();
                 var personeIDs = allShowCastPersones.Select(c => c.CastPersoneId).Distinct().ToList();
 
                 var obsoleteEntitiesByShows = await _context.ShowCastPersoneRelation.Where(s => !showIDs.Contains(s.ShowId)).ToListAsync();
                 var obsoleteEntitiesByPersone = obsoleteEntitiesByShows.Where(s => !personeIDs.Contains(s.CastPersoneId)).ToList();
-
-
-                //var obsoleteEntities = await _context.ShowCastPersoneRelation.Where(s => !allShowCastPersones.Any(r => r.ShowId == s.ShowId && r.CastPersoneId == s.CastPersoneId)).ToListAsync();
 
                 if (obsoleteEntitiesByPersone.Any())
                 {
@@ -152,8 +148,6 @@ namespace TvMaze.Core.Services.Shows
                 }
 
                 var entities = await _context.ShowCastPersoneRelation.AsNoTracking().ToListAsync();
-
-                //                var newEntities = allShowCastPersones.Where(s => !entities.Any(e => e.ShowId == s.ShowId && e.CastPersoneId == s.CastPersoneId)).Select(r => new ShowCastPersoneRelation(r.ShowId, r.CastPersoneId)).ToList();
 
                 var shows = _context.Shows.Where(s=> showIDs.Contains(s.ShowId)).AsNoTracking().ToList();
                 var persones = _context.CastPersones.Where(s => personeIDs.Contains(s.PersonId)).AsNoTracking().ToList();
