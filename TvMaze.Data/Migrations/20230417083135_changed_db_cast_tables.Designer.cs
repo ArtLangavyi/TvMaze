@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TvMaze.Data.Context;
 
@@ -11,9 +12,11 @@ using TvMaze.Data.Context;
 namespace TvMaze.Data.Migrations
 {
     [DbContext(typeof(TvMazeContext))]
-    partial class TvMazeContextModelSnapshot : ModelSnapshot
+    [Migration("20230417083135_changed_db_cast_tables")]
+    partial class changed_db_cast_tables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -56,11 +59,11 @@ namespace TvMaze.Data.Migrations
                         .HasColumnType("nvarchar(512)");
 
                     b.HasKey("Id")
-                        .HasName("PK_CastPersone");
+                        .HasName("PK_Cast");
 
                     b.HasIndex("ShowId");
 
-                    b.ToTable("CastPersone", (string)null);
+                    b.ToTable("Cast", (string)null);
                 });
 
             modelBuilder.Entity("TvMaze.Domain.Show", b =>
@@ -112,16 +115,16 @@ namespace TvMaze.Data.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id")
-                        .HasName("PK_ShowCastPersoneRelation");
+                        .HasName("PK_ShowCastRelation");
 
                     b.HasIndex("CastPersoneId");
 
                     b.HasIndex("ShowId");
 
                     b.HasIndex("Id", "ShowId", "CastPersoneId")
-                        .HasDatabaseName("IX_ShowCastPersoneRelation_ShowId_CastPersone_id");
+                        .HasDatabaseName("IX_ShowCastRelation_ShowId_CastPersone_id");
 
-                    b.ToTable("ShowCastPersoneRelation", (string)null);
+                    b.ToTable("ShowCastRelation", (string)null);
                 });
 
             modelBuilder.Entity("TvMaze.Domain.ShowLink", b =>
@@ -163,19 +166,19 @@ namespace TvMaze.Data.Migrations
 
             modelBuilder.Entity("TvMaze.Domain.ShowCastPersoneRelation", b =>
                 {
-                    b.HasOne("TvMaze.Domain.CastPersone", "CastPersone")
+                    b.HasOne("TvMaze.Domain.Show", "Show")
                         .WithMany("ShowCastRelation")
                         .HasForeignKey("CastPersoneId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("FK_ShowCastPersoneRelation_Show_Cascade_Delete");
+                        .HasConstraintName("FK_ShowCastPersoneRelation_Show_Cascade");
 
-                    b.HasOne("TvMaze.Domain.Show", "Show")
+                    b.HasOne("TvMaze.Domain.CastPersone", "CastPersone")
                         .WithMany("ShowCastRelation")
                         .HasForeignKey("ShowId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("FK_ShowCastPersoneRelation_CastPersone_Cascade_Delete");
+                        .HasConstraintName("FK_ShowCastPersoneRelation_CastPersone_Cascade");
 
                     b.Navigation("CastPersone");
 

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TvMaze.Data.Context;
 
@@ -11,9 +12,11 @@ using TvMaze.Data.Context;
 namespace TvMaze.Data.Migrations
 {
     [DbContext(typeof(TvMazeContext))]
-    partial class TvMazeContextModelSnapshot : ModelSnapshot
+    [Migration("20230417091331_added_some_fks")]
+    partial class added_some_fks
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -163,14 +166,14 @@ namespace TvMaze.Data.Migrations
 
             modelBuilder.Entity("TvMaze.Domain.ShowCastPersoneRelation", b =>
                 {
-                    b.HasOne("TvMaze.Domain.CastPersone", "CastPersone")
+                    b.HasOne("TvMaze.Domain.Show", "Show")
                         .WithMany("ShowCastRelation")
                         .HasForeignKey("CastPersoneId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK_ShowCastPersoneRelation_Show_Cascade_Delete");
 
-                    b.HasOne("TvMaze.Domain.Show", "Show")
+                    b.HasOne("TvMaze.Domain.CastPersone", "CastPersone")
                         .WithMany("ShowCastRelation")
                         .HasForeignKey("ShowId")
                         .OnDelete(DeleteBehavior.Cascade)

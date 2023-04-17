@@ -2,7 +2,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Serilog;
 using System.Net;
+using System.Text.Json;
 using TvMaze.Clients;
+using TvMaze.Core.Clients.TvMaze.Models.Show;
 using TvMaze.Core.Services.Shows;
 using TvMaze.Data.Context;
 using TvMaze.Data.Interceptors;
@@ -33,7 +35,7 @@ var tvMazeApiSettings = configuration.GetSection("TvMaze.Api.Settings").Get<TvMa
 builder.Services.AddSingleton(tvMazeApiSettings);
 
 
-if (tvMazeApiSettings.ProxyEnabled)
+if (tvMazeApiSettings!.ProxyEnabled)
 {
     builder.Services.AddHttpClient("tvmaze-api", o => { o.BaseAddress = new Uri(tvMazeApiSettings.BaseUrl); })
     .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler()
@@ -70,7 +72,6 @@ else
 
 
 builder.Services.AddTransient<ITvMazeApiFactory, TvMazeApiFactory>();
-
 builder.Services.AddTransient<IShowService, ShowService>();
 builder.Services.AddTransient<IScraperScopeService, ScraperScopeService>();
 
@@ -79,7 +80,7 @@ builder.Services.AddDbContext<TvMazeContext>(o =>
 {
     o.UseSqlServer(ConnectionSettings.DefaultConnection, b => b.MigrationsAssembly("TvMaze.Data"));
 
-    if (!_nonLocalEnv.Contains(Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")))
+    if (IsDevelopment())
     {
         o.EnableSensitiveDataLogging(true);
         o.AddInterceptors(new TraceCommandInterceptor());
@@ -93,16 +94,13 @@ builder.Services.AddDbContext<TvMazeContext>(o =>
     }
 });
 
-builder.Services.AddHostedService<SchedulesIndexingService>();
+//builder.Services.AddHostedService<SchedulesIndexingService>();
 builder.Services.AddHostedService<ShowCastScaperService>();
-
-
-
-// Add services to the container.
 
 var app = builder.Build();
 
 await app.RunAsync();
+
 
 IHost host = Host.CreateDefaultBuilder(args)
     .ConfigureWebHostDefaults(webBuilder => webBuilder.UseKestrel(options => options.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(5)))

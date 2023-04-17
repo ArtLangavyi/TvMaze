@@ -7,12 +7,13 @@ namespace TvMaze.Domain
     {
         [StringLength(255)]
         public string Name { get; set; }
-        public virtual ICollection<Cast> Cast { get; set; }
-        public virtual ICollection<ShowCastRelation> ShowCastRelation { get; set; }
+        public int ShowId { get; set; }
+        public virtual ICollection<CastPersone> Cast { get; set; }
+        public virtual ICollection<ShowCastPersoneRelation> ShowCastRelation { get; set; }
 
         public Show()
         {
-            Cast = new HashSet<Cast>();
+            Cast = new HashSet<CastPersone>();
         }
     }
 }

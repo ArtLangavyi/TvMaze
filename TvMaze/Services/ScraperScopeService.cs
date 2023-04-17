@@ -1,40 +1,42 @@
-﻿using System.Text.Json;
+﻿using System.Collections.Concurrent;
+using System.Text.Json;
 using TvMaze.Clients;
-using TvMaze.Core.Models.Schedule;
+using TvMaze.Core.Clients.TvMaze.Models.Schedule;
+using TvMaze.Core.Clients.TvMaze.Models.Show;
 using TvMaze.Core.Services.Shows;
+using TvMaze.Domain;
 using TvMaze.Workers.Models.Settings;
 
 namespace TvMaze.Services
 {
     public class ScraperScopeService : IScraperScopeService
     {
-        private readonly ParallelOptions parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 4 };
+        ParallelOptions parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 4 };
+        private readonly JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
         private ILogger<ScraperScopeService> _logger { get; init; }
         private ITvMazeApiFactory _tvMazeApiFactory { get; init; }
-        private TvMazeApiSettings _tvMazeApiSettings { get; init; }
         private IShowService _showService { get; init; }
-        private readonly IHttpClientFactory _clientFactory;
 
-        public ScraperScopeService(ILogger<ScraperScopeService> logger, TvMazeApiSettings tvMazeApiSettings, ITvMazeApiFactory tvMazeApiFactory, IShowService showService, IHttpClientFactory clientFactory)
+        public ScraperScopeService(ILogger<ScraperScopeService> logger, ITvMazeApiFactory tvMazeApiFactory, IShowService showService, IHttpClientFactory clientFactory)
         {
-            _tvMazeApiSettings = tvMazeApiSettings;
             _tvMazeApiFactory = tvMazeApiFactory;
             _logger = logger;
             _showService = showService;
-            _clientFactory = clientFactory;
         }
         public async Task PullDataAsync()
         {
             var showLinks = await _showService.GetActualShowUrlsAsync();
             if (showLinks!.Count > 0)
             {
+                var result = new ConcurrentBag<ShowDetailResponse>();
+
                 using (var client = _tvMazeApiFactory.MakeHttpClient())
                 {
-                    await Parallel.ForEachAsync(showLinks, parallelOptions, async (show, cancellationToken) =>
+                    await Parallel.ForEachAsync(showLinks.Take(10), parallelOptions, async (show, cancellationToken) =>
                     {
                         try
                         {
-                            var response = await client.GetAsync(show, cancellationToken);
+                            var response = await client.GetAsync($"{show}?embed=cast", cancellationToken);
 
                             if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
                             {
@@ -49,6 +51,10 @@ namespace TvMaze.Services
                             response.EnsureSuccessStatusCode();
 
                             var jsonString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+                            var showCastResponse = JsonSerializer.Deserialize<ShowDetailResponse>(jsonString, jsonSerializerOptions);
+
+                            result.Add(showCastResponse);
                         }
                         catch (Exception ex)
                         {
@@ -56,6 +62,10 @@ namespace TvMaze.Services
                         }
                     });
                 }
+
+                if (result.Count > 0)
+                    await _showService.SaveShowWithCastAsync(result.ToList());
+
             }
         }
 
@@ -85,7 +95,7 @@ namespace TvMaze.Services
 
                             var jsonString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
-                            var schedules = JsonSerializer.Deserialize<List<ScheduleOverview>>(jsonString);
+                            var schedules = JsonSerializer.Deserialize<List<ScheduleOverviewResponse>>(jsonString, jsonSerializerOptions);
 
                             await _showService.SaveShowUrlsAsync(schedules!);
 
@@ -98,7 +108,7 @@ namespace TvMaze.Services
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, $"Could not deserialize the response body string as {typeof(ScheduleOverview).FullName}.");
+                    _logger.LogError(ex, $"Could not deserialize the response body string as {typeof(ScheduleOverviewResponse).FullName}.");
                 }
             }
         }

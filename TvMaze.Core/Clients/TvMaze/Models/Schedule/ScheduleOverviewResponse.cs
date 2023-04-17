@@ -1,6 +1,6 @@
-﻿namespace TvMaze.Core.Models.Schedule
+﻿namespace TvMaze.Core.Clients.TvMaze.Models.Schedule
 {
-    public class ScheduleOverview
+    public class ScheduleOverviewResponse
     {
         public int id { get; set; }
         public ScheduleLinks _links { get; set; }

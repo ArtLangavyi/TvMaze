@@ -7,9 +7,9 @@ namespace TvMaze.Data.Context
     public partial class TvMazeContext : DbContext
     {
         public virtual DbSet<ShowLink> ShowLinks { get; set; }
-        public virtual DbSet<Cast> Casts { get; set; }
+        public virtual DbSet<CastPersone> CastPersones { get; set; }
         public virtual DbSet<Show> Shows { get; set; }
-        public virtual DbSet<ShowCastRelation> ShowCastRelation { get; set; }
+        public virtual DbSet<ShowCastPersoneRelation> ShowCastPersoneRelation { get; set; }
 
         public TvMazeContext()
         {
@@ -46,46 +46,45 @@ namespace TvMaze.Data.Context
                 entity.Property(e => e.Name);
             });
 
-            modelBuilder.Entity<Cast>(entity =>
+            modelBuilder.Entity<CastPersone>(entity =>
             {
-                entity.ToTable("Cast");
+                entity.ToTable("CastPersone");
 
                 entity.HasKey(e => e.Id)
-                    .HasName("PK_Cast");
+                    .HasName("PK_CastPersone");
 
                 entity.Property(e => e.Id);
                 entity.Property(e => e.Name);
                 entity.Property(e => e.Birthday);
             });
 
-            modelBuilder.Entity<ShowCastRelation>(entity =>
+            modelBuilder.Entity<ShowCastPersoneRelation>(entity =>
             {
-                entity.ToTable("ShowCastRelation");
+                entity.ToTable("ShowCastPersoneRelation");
 
                 entity.HasKey(e => e.Id)
-                    .HasName("PK_ShowCastRelation");
+                    .HasName("PK_ShowCastPersoneRelation");
 
                 entity.Property(e => e.Id);
 
-                entity.HasIndex(e => new { e.Id, e.ShowId, e.CastId })
-                    .HasDatabaseName("IX_ShowCastRelation_ShowId_Cast_id");
+                entity.HasIndex(e => new { e.Id, e.ShowId, e.CastPersoneId })
+                    .HasDatabaseName("IX_ShowCastPersoneRelation_ShowId_CastPersone_id");
 
                 entity.Property(e => e.ShowId);
 
-                entity.Property(e => e.CastId);
-
-                entity.HasOne(d => d.Cast)
-                    .WithMany(p => p.ShowCastRelation)
-                    .HasPrincipalKey(p => p.Id)
-                    .HasForeignKey(d => d.ShowId)
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .HasConstraintName("FK_ShowCastRelation_Cast_Cascade");
+                entity.Property(e => e.CastPersoneId);
 
                 entity.HasOne(d => d.Show)
                     .WithMany(p => p.ShowCastRelation)
-                    .HasForeignKey(d => d.CastId)
+                    .HasForeignKey(d => d.ShowId)
                     .OnDelete(DeleteBehavior.Cascade)
-                    .HasConstraintName("FK_ShowCastRelation_Show_Cascade");
+                    .HasConstraintName("FK_ShowCastPersoneRelation_CastPersone_Cascade_Delete");
+
+                entity.HasOne(d => d.CastPersone)
+                    .WithMany(p => p.ShowCastRelation)
+                    .HasForeignKey(d => d.CastPersoneId)
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .HasConstraintName("FK_ShowCastPersoneRelation_Show_Cascade_Delete");
             });
         }
 

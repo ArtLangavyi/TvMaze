@@ -1,11 +1,11 @@
-﻿using TvMaze.Core.Models.Schedule;
+﻿using TvMaze.Core.Clients.TvMaze.Models.Schedule;
 using TvMaze.Domain;
 
 namespace TvMaze.Core.Mappers
 {
     public static class ScheduleMapper
     {
-        public static ShowLink ToShowLinkEntity(this ScheduleShowLink model)
+        public static ShowLink ToShowLinkEntity(this ScheduleShowLinkResponse model)
         {
             var entity = new ShowLink();
 

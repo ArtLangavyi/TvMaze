@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TvMaze.Data.Context;
 
@@ -11,9 +12,11 @@ using TvMaze.Data.Context;
 namespace TvMaze.Data.Migrations
 {
     [DbContext(typeof(TvMazeContext))]
-    partial class TvMazeContextModelSnapshot : ModelSnapshot
+    [Migration("20230417075645_added_showid_field")]
+    partial class added_showid_field
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -22,7 +25,7 @@ namespace TvMaze.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("TvMaze.Domain.CastPersone", b =>
+            modelBuilder.Entity("TvMaze.Domain.Cast", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -43,9 +46,6 @@ namespace TvMaze.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("PersonId")
-                        .HasColumnType("int");
-
                     b.Property<int?>("ShowId")
                         .HasColumnType("int");
 
@@ -56,11 +56,11 @@ namespace TvMaze.Data.Migrations
                         .HasColumnType("nvarchar(512)");
 
                     b.HasKey("Id")
-                        .HasName("PK_CastPersone");
+                        .HasName("PK_Cast");
 
                     b.HasIndex("ShowId");
 
-                    b.ToTable("CastPersone", (string)null);
+                    b.ToTable("Cast", (string)null);
                 });
 
             modelBuilder.Entity("TvMaze.Domain.Show", b =>
@@ -97,7 +97,7 @@ namespace TvMaze.Data.Migrations
                     b.ToTable("Show", (string)null);
                 });
 
-            modelBuilder.Entity("TvMaze.Domain.ShowCastPersoneRelation", b =>
+            modelBuilder.Entity("TvMaze.Domain.ShowCastRelation", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -105,23 +105,23 @@ namespace TvMaze.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("CastPersoneId")
+                    b.Property<int>("CastId")
                         .HasColumnType("int");
 
                     b.Property<int>("ShowId")
                         .HasColumnType("int");
 
                     b.HasKey("Id")
-                        .HasName("PK_ShowCastPersoneRelation");
+                        .HasName("PK_ShowCastRelation");
 
-                    b.HasIndex("CastPersoneId");
+                    b.HasIndex("CastId");
 
                     b.HasIndex("ShowId");
 
-                    b.HasIndex("Id", "ShowId", "CastPersoneId")
-                        .HasDatabaseName("IX_ShowCastPersoneRelation_ShowId_CastPersone_id");
+                    b.HasIndex("Id", "ShowId", "CastId")
+                        .HasDatabaseName("IX_ShowCastRelation_ShowId_Cast_id");
 
-                    b.ToTable("ShowCastPersoneRelation", (string)null);
+                    b.ToTable("ShowCastRelation", (string)null);
                 });
 
             modelBuilder.Entity("TvMaze.Domain.ShowLink", b =>
@@ -154,35 +154,35 @@ namespace TvMaze.Data.Migrations
                     b.ToTable("ShowLink", (string)null);
                 });
 
-            modelBuilder.Entity("TvMaze.Domain.CastPersone", b =>
+            modelBuilder.Entity("TvMaze.Domain.Cast", b =>
                 {
                     b.HasOne("TvMaze.Domain.Show", null)
                         .WithMany("Cast")
                         .HasForeignKey("ShowId");
                 });
 
-            modelBuilder.Entity("TvMaze.Domain.ShowCastPersoneRelation", b =>
+            modelBuilder.Entity("TvMaze.Domain.ShowCastRelation", b =>
                 {
-                    b.HasOne("TvMaze.Domain.CastPersone", "CastPersone")
+                    b.HasOne("TvMaze.Domain.Show", "Show")
                         .WithMany("ShowCastRelation")
-                        .HasForeignKey("CastPersoneId")
+                        .HasForeignKey("CastId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("FK_ShowCastPersoneRelation_Show_Cascade_Delete");
+                        .HasConstraintName("FK_ShowCastRelation_Show_Cascade");
 
-                    b.HasOne("TvMaze.Domain.Show", "Show")
+                    b.HasOne("TvMaze.Domain.Cast", "Cast")
                         .WithMany("ShowCastRelation")
                         .HasForeignKey("ShowId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("FK_ShowCastPersoneRelation_CastPersone_Cascade_Delete");
+                        .HasConstraintName("FK_ShowCastRelation_Cast_Cascade");
 
-                    b.Navigation("CastPersone");
+                    b.Navigation("Cast");
 
                     b.Navigation("Show");
                 });
 
-            modelBuilder.Entity("TvMaze.Domain.CastPersone", b =>
+            modelBuilder.Entity("TvMaze.Domain.Cast", b =>
                 {
                     b.Navigation("ShowCastRelation");
                 });
