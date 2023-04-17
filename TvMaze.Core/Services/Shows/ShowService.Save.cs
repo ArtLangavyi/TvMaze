@@ -1,10 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Xml;
-using TvMaze.Core.Clients.TvMaze.Models.Cast;
 using TvMaze.Core.Clients.TvMaze.Models.Schedule;
 using TvMaze.Core.Clients.TvMaze.Models.Show;
 using TvMaze.Domain;
@@ -90,7 +84,8 @@ namespace TvMaze.Core.Services.Shows
 
         private async Task SaveAllCastPersonesAsync(List<ShowDetailResponse> showDetailResponseList)
         {
-            var allCastPersones = showDetailResponseList.SelectMany(s => s._embedded.Cast.Select(c => c.Person)).Distinct().ToList();
+            var allCastPersones = showDetailResponseList.Where(s => s._embedded != null && s._embedded.Cast != null)
+                                    .SelectMany(s => s._embedded.Cast.Select(c => c.Person)).Distinct().ToList();
 
             if (allCastPersones.Any())
             {
@@ -133,9 +128,10 @@ namespace TvMaze.Core.Services.Shows
         {
             if (showDetailResponseList.Any())
             {
-                var allShowCastPersones = showDetailResponseList.SelectMany(s => s._embedded.Cast.Select(c => new { ShowId = s.Id, CastPersoneId = c.Person.Id })).Distinct().ToList();
+                var allShowCastPersones = showDetailResponseList.Where(s => s._embedded != null && s._embedded.Cast != null)
+                    .SelectMany(s => s._embedded.Cast.Select(c => new { ShowId = s.Id, CastPersoneId = c.Person.Id })).Distinct().ToList();
 
-                var showIDs = allShowCastPersones.Select(c=> c.ShowId).Distinct().ToList();
+                var showIDs = allShowCastPersones.Select(c => c.ShowId).Distinct().ToList();
                 var personeIDs = allShowCastPersones.Select(c => c.CastPersoneId).Distinct().ToList();
 
                 var obsoleteEntitiesByShows = await _context.ShowCastPersoneRelation.Where(s => !showIDs.Contains(s.ShowId)).ToListAsync();
@@ -149,12 +145,12 @@ namespace TvMaze.Core.Services.Shows
 
                 var entities = await _context.ShowCastPersoneRelation.AsNoTracking().ToListAsync();
 
-                var shows = _context.Shows.Where(s=> showIDs.Contains(s.ShowId)).AsNoTracking().ToList();
+                var shows = _context.Shows.Where(s => showIDs.Contains(s.ShowId)).AsNoTracking().ToList();
                 var persones = _context.CastPersones.Where(s => personeIDs.Contains(s.PersonId)).AsNoTracking().ToList();
 
                 var newEntities = allShowCastPersones.Where(s => !entities
                                                             .Any(e => e.ShowId == s.ShowId && e.CastPersoneId == s.CastPersoneId))
-                                .Select(r => new ShowCastPersoneRelation(shows.First(s=>s.ShowId == r.ShowId).Id, persones.First(p=>p.PersonId == r.CastPersoneId).Id)).ToList();
+                                .Select(r => new ShowCastPersoneRelation(shows.First(s => s.ShowId == r.ShowId).Id, persones.First(p => p.PersonId == r.CastPersoneId).Id)).ToList();
 
                 if (newEntities.Any())
                 {

@@ -4,13 +4,12 @@ using TvMaze.Clients;
 using TvMaze.Core.Clients.TvMaze.Models.Schedule;
 using TvMaze.Core.Clients.TvMaze.Models.Show;
 using TvMaze.Core.Services.Shows;
-using TvMaze.Domain;
-using TvMaze.Workers.Models.Settings;
 
 namespace TvMaze.Services
 {
     public class ScraperScopeService : IScraperScopeService
     {
+        const int MaxRetries = 5;
         ParallelOptions parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 4 };
         private readonly JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
         private ILogger<ScraperScopeService> _logger { get; init; }
@@ -30,25 +29,13 @@ namespace TvMaze.Services
             {
                 var result = new ConcurrentBag<ShowDetailResponse>();
 
-                using (var client = _tvMazeApiFactory.MakeHttpClient())
+                using (var _httpClient = _tvMazeApiFactory.MakeHttpClient())
                 {
                     await Parallel.ForEachAsync(showLinks, parallelOptions, async (show, cancellationToken) =>
                     {
                         try
                         {
-                            var response = await client.GetAsync($"{show}?embed=cast", cancellationToken);
-
-                            if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
-                            {
-                                var sleepTimer = 10;
-
-                                if (response.Headers.Contains("Retry-After"))
-                                    sleepTimer = int.Parse(response.Headers.GetValues("Retry-After").First());
-
-                                Thread.Sleep(sleepTimer * 1000);
-                            }
-
-                            response.EnsureSuccessStatusCode();
+                            var response = await SendAsync(_httpClient, $"{show}?embed=cast", cancellationToken);
 
                             var jsonString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
@@ -79,19 +66,7 @@ namespace TvMaze.Services
                     {
                         try
                         {
-                            var response = await _httpClient.GetAsync("/schedule/full", cancellationTokenSource.Token);
-
-                            if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
-                            {
-                                var sleepTimer = 10;
-
-                                if (response.Headers.Contains("Retry-After"))
-                                    sleepTimer = int.Parse(response.Headers.GetValues("Retry-After").First());
-
-                                Thread.Sleep(sleepTimer * 1000);
-                            }
-
-                            response.EnsureSuccessStatusCode();
+                            var response = await SendAsync(_httpClient, "/schedule/full", cancellationTokenSource.Token);
 
                             var jsonString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
@@ -111,6 +86,34 @@ namespace TvMaze.Services
                     _logger.LogError(ex, $"Could not deserialize the response body string as {typeof(ScheduleOverviewResponse).FullName}.");
                 }
             }
+        }
+
+        protected async Task<HttpResponseMessage> SendAsync(HttpClient _httpClient, string url, CancellationToken cancellationToken)
+        {
+            HttpResponseMessage response = null;
+            for (int i = 0; i < MaxRetries; i++)
+            {
+                response = await _httpClient.GetAsync(url, cancellationToken);
+
+                if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+                {
+                    var sleepTimer = 10;
+
+                    if (response.Headers.Contains("Retry-After"))
+                        sleepTimer = int.Parse(response.Headers.GetValues("Retry-After").First());
+
+                    Thread.Sleep(sleepTimer * 1000);
+
+                    await SendAsync(_httpClient, url, cancellationToken);
+                }
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return response;
+                }
+            }
+
+            return response;
         }
     }
 }
