@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="7.0.5" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="3.1.8" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.3.2" />
     <PackageReference Include="Moq" Version="4.18.4" />
@@ -29,6 +30,10 @@
     <ProjectReference Include="..\TvMaze.Data\TvMaze.Data.csproj" />
     <ProjectReference Include="..\TvMaze.Domain\TvMaze.Domain.csproj" />
     <ProjectReference Include="..\TvMaze\TvMaze.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Mock\" />
   </ItemGroup>
 
 </Project>
