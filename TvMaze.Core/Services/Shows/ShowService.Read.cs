@@ -12,14 +12,19 @@ namespace TvMaze.Core.Services.Shows
             return await _context.ShowLinks.Select(x => x.Url).ToListWithNoLockAsync();
         }
 
-        public async Task<ServiceModelResult<List<ShowCastOverviewResponse>>> GetShowsWithCastAsync()
+        public async Task<ServiceModelResult<List<ShowCastOverviewResponse>>> GetShowsWithCastAsync(int page, int size)
         {
             var result = new ServiceModelResult<List<ShowCastOverviewResponse>>();
+
+            var take = Math.Max(1, size);
+            var skip = (Math.Max(1, page) - 1) * take;
 
             var shows = await _context.Shows
                 .Include(s => s.ShowCastRelation)
                 .ThenInclude(r => r.CastPersone)
                 .OrderBy(s => s.ShowId)
+                .Skip(skip)
+                .Take(take)
                 .AsNoTracking()
                 .ToListWithNoLockAsync();
 

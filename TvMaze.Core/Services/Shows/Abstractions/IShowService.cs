@@ -10,6 +10,6 @@ namespace TvMaze.Core.Services.Shows
         Task SaveShowUrlsAsync(List<ScheduleOverviewResponse> scheduleOverviewList);
         Task<List<string>> GetActualShowUrlsAsync();
         Task SaveShowWithCastAsync(List<ShowDetailResponse> showDetailResponseList);
-        Task<ServiceModelResult<List<ShowCastOverviewResponse>>> GetShowsWithCastAsync();
+        Task<ServiceModelResult<List<ShowCastOverviewResponse>>> GetShowsWithCastAsync(int page, int size);
     }
 }

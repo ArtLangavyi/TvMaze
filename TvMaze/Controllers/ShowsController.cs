@@ -16,13 +16,13 @@ namespace TvMaze.Controllers
             _showService = showService;
         }
 
-        [HttpGet("overview")]
+        [HttpGet("overview/{page:int}/{size:int}")]
         [OpenApiTag("Shows")]
         [OpenApiOperation("Get Shows", "All shows with cast")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<List<ShowCastOverviewResponse>>> GetShowsWithCastAsync()
+        public async Task<ActionResult<List<ShowCastOverviewResponse>>> GetShowsWithCastAsync(int page, int size=24)
         {
-            var result = await _showService.GetShowsWithCastAsync();
+            var result = await _showService.GetShowsWithCastAsync(page, size);
 
             return ModelOrError(result);
         }

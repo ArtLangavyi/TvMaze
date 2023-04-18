@@ -94,8 +94,9 @@ builder.Services.AddDbContext<TvMazeContext>(o =>
     }
 });
 
-builder.Services.AddHostedService<SchedulesIndexingService>();
-builder.Services.AddHostedService<ShowCastScaperService>();
+// builder.Services.AddHostedService<SchedulesIndexingService>();
+// builder.Services.AddHostedService<ShowCastScaperService>();
+// 
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "TvMaze API", Version = "v1" });
